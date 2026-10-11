@@ -25,6 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/health', (req, res) => res.type('text').send('ok'));
 app.use('/api/admin', require('./src/routes/admin'));
 app.use('/api', require('./src/routes/public'));
 
@@ -49,4 +50,17 @@ app.listen(PORT, () => {
   console.log(`🔐 لوحة الإدارة: http://localhost:${PORT}/admin`);
   reminders.start();
   if (process.env.DISABLE_TELEGRAM_BOT !== 'true') telegramBot.start();
+  keepAwake();
 });
+
+// يبقي الموقع صاحي على الاستضافات المجانية اللي تطفي الموقع بدون زوار (مثل Render):
+// الموقع يزور رابطه العام كل 10 دقائق. Render يحط الرابط تلقائياً بمتغير RENDER_EXTERNAL_URL
+function keepAwake() {
+  const url = process.env.RENDER_EXTERNAL_URL || process.env.KEEP_AWAKE_URL;
+  if (!url || process.env.KEEP_AWAKE === 'false') return;
+  const target = url.replace(/\/$/, '') + '/health';
+  setInterval(() => {
+    fetch(target, { headers: { 'User-Agent': 'keep-awake' } }).catch(() => {});
+  }, 10 * 60 * 1000);
+  console.log(`⏰ تشغيل دائم مفعّل: زيارة ${target} كل 10 دقائق`);
+}
