@@ -54,13 +54,13 @@ app.listen(PORT, () => {
 });
 
 // يبقي الموقع صاحي على الاستضافات المجانية اللي تطفي الموقع بدون زوار (مثل Render):
-// الموقع يزور رابطه العام كل 10 دقائق. Render يحط الرابط تلقائياً بمتغير RENDER_EXTERNAL_URL
+// الموقع يزور رابطه العام كل 5 دقائق. Render يحط الرابط تلقائياً بمتغير RENDER_EXTERNAL_URL
 function keepAwake() {
   const url = process.env.RENDER_EXTERNAL_URL || process.env.KEEP_AWAKE_URL;
   if (!url || process.env.KEEP_AWAKE === 'false') return;
   const target = url.replace(/\/$/, '') + '/health';
   setInterval(() => {
     fetch(target, { headers: { 'User-Agent': 'keep-awake' } }).catch(() => {});
-  }, 10 * 60 * 1000);
-  console.log(`⏰ تشغيل دائم مفعّل: زيارة ${target} كل 10 دقائق`);
+  }, 5 * 60 * 1000);
+  console.log(`⏰ تشغيل دائم مفعّل: زيارة ${target} كل 5 دقائق`);
 }
